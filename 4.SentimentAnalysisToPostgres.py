@@ -57,8 +57,8 @@ df_parsed = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", c.KAFKA_BROKER) \
     .option("subscribe", c.KAFKA_TOPIC) \
-    .option("startingOffsets", "earliest") \
     .load()
+#  .option("startingOffsets", "earliest") \
 
 # Convert message column to JSON with schema
 df_parsed = df_parsed.withColumn("json_data", F.from_json(F.col("value").cast("string"), schema))
@@ -109,7 +109,7 @@ postgres_options = {
     "driver": "org.postgresql.Driver"
 }
 
-# Write the processed stream (you can specify the output sink as needed)
+# Write the processed stream 
 query = df_analyzed.writeStream \
     .outputMode("append") \
     .foreachBatch(lambda df, epoch_id: df.write \
