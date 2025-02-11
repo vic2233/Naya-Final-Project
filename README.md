@@ -53,6 +53,7 @@ python scripts/LoadToKafka.py
 python scripts/WriteToParquetFiles.py
 python scripts/SentimentAnalysisToPostgres.py
 python scripts/ArchiveFiles.py
+python scripts/DeleteFiles.py
 
 4. Schedule with Airflow
 
