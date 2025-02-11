@@ -53,7 +53,7 @@ kafka_df = spark.readStream \
    #.option("startingOffsets", "earliest")\
    #.option("startingOffsets", "latest") \
 
-# Parse JSON messages and add a partition column (date)
+# Parse JSON messages 
 parsed_df = kafka_df.selectExpr("CAST(value AS STRING)") \
     .select(from_json(col("value"), schema).alias("data")) \
     .selectExpr("data.`Unique id` as unique_id", 
@@ -78,7 +78,7 @@ parsed_df = kafka_df.selectExpr("CAST(value AS STRING)") \
                 "data.`CSAT Score` as csat_score") \
     .withColumn("partition_date", current_date())
 
-# Write to S3 as partitioned Parquet files
+# Write to S3
 query = parsed_df.writeStream \
     .format("parquet") \
     .option("checkpointLocation", s3_checkpoints) \
