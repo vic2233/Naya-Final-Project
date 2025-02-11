@@ -1,0 +1,4 @@
+pip install textblob
+pip install minio 
+pip install pyspark
+pip install pandas
