@@ -20,25 +20,33 @@ Tech Stack:
 
 Project Structure
 
-├── dags/
-│   ├── final_project_archive_files.py  # Airflow DAG to automate ETL steps
-├── scripts/
-│   ├── LoadFromCsvToJson.py  # Convert CSV data to JSON format
-│   ├── LoadToKafka.py        # Publish JSON data to Kafka topic
-│   ├── WriteToParquetFiles.py # Store data in Parquet format
-│   ├── SentimentAnalysisToPostgres.py # Perform sentiment analysis & save to PostgreSQL
-│   ├── ArchiveFiles.py       # Move processed files to archive
-│   ├── configuration.py      # Configuration settings for paths, Kafka, DB, etc.
-├── data/                     # Raw and processed data storage
-├── logs/                     # Log files for debugging
-├── README.md                 # Project documentation
-└── requirements.txt           # Required Python dependencies
+1. dags
+   
+   final_project_archive_files.py  # Airflow DAG to automate ETL steps
+3. scripts
+   
+    LoadFromCsvToJson.py  # Convert CSV data to JSON format
+   
+    LoadToKafka.py        # Publish JSON data to Kafka topic
+   
+    WriteToParquetFiles.py # Store data in Parquet format
+   
+    SentimentAnalysisToPostgres.py # Perform sentiment analysis & save to PostgreSQL
+   
+    ArchiveFiles.py       # Move processed files to archive
+   
+    DeleteFiles.py        # Delete files from real time bucket
+   
+    configuration.py      # Configuration settings for paths, Kafka, DB, etc.
+   
+5. README.md                 # Project documentation
+6. requirements.txt           # Required Python dependencies
 
 Setup & Installation
 
 1. Install Dependencies
 
-pip install -r requirements.txt
+  requirements.txt
 
 2. Start Kafka & PostgreSQL (if using Docker)
 
