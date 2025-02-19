@@ -5,7 +5,7 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 default_args = {
     'owner': 'Victoria',
     'depends_on_past': False,
-    'start_date': datetime(2025, 2, 9),
+    'start_date': datetime(2025, 2, 15),
     'email': ['vic2233@gmail.com'],
     'email_on_failure': False,
     'email_on_retry': False,
@@ -20,11 +20,23 @@ with DAG(
     schedule_interval='@daily'
 ) as dag:
 
-    # Task 1: Archive files
+    # Task 1: Archive purquet files to historical bucket
     archive_files_task = SSHOperator(
         task_id="archive_files",
-        ssh_conn_id="dev_env_ssh",  # Ensure this connection is set up in Airflow
-    #    command="python3 /home/developer/projects/FinalProject/Archive/5.ArchiveFiles.py"
-       command="AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin AWS_ENDPOINT_URL=http://localhost:9002 python3 /home/developer/projects/FinalProject/Archive/5.ArchiveFiles.py"
-
+        ssh_conn_id="dev_env_ssh", 
+        command="python3 /home/developer/projects/FinalProject/Archive/5.ArchiveFiles.py"
     )
+
+    # Task 2: Delete real time- daily purquet files
+    delete_rtm_files_task = SSHOperator(
+        task_id="delete_rtm_files",
+        ssh_conn_id="dev_env_ssh", 
+        command="python3 /home/developer/projects/FinalProject/Archive/6.DeleteFiles.py"
+    )
+
+
+# Task dependencies
+archive_files_task >> delete_rtm_files_task
+
+
+
