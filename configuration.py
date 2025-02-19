@@ -1,3 +1,4 @@
+
 ######KAFKA CONFIG###########
 KAFKA_BROKER = "course-kafka:9092" 
 KAFKA_TOPIC = 'Customer_Support'  
@@ -6,6 +7,8 @@ KAFKA_TOPIC = 'Customer_Support'
 json_file_path = '/home/developer/projects/FinalProject/LoadData/Customer_support_data.json'  # Update with your JSON file path
 
 #######S3####################
+s3_key='minioadmin'
+s3_url='http://minio:9000'
 s3_bucket ='s3a://finalproject/app_source_data/'
 s3_checkpoints='s3a://checkpoint/'
 
