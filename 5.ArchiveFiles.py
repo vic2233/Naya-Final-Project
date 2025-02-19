@@ -1,52 +1,39 @@
 from pyspark.sql import SparkSession
 from datetime import datetime
-import os
+import configuration as c
 
-
-# Initialize Spark Session
-spark = SparkSession.builder \
-    .appName("s3_remove_and_agg_daily") \
-    .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0') \
+# Set Hadoop configurations
+spark = SparkSession \
+    .builder \
+    .master("local[*]") \
+    .appName('ROUTES_TO_S3') \
+    .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2') \
+        .config("spark.hadoop.fs.s3a.endpoint", c.s3_url) \
+    .config("spark.hadoop.fs.s3a.access.key", c.s3_key) \
+    .config("spark.hadoop.fs.s3a.secret.key", c.s3_key) \
+    .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
     .getOrCreate()
 
-
 # Define MinIO paths
-MINIO_BUCKET = "s3a://root/"
-PARQUET_PATH = "s3a://root/data/"  # Root folder with all Parquet files
+PARQUET_PATH = "s3a://finalproject/app_source_data/"
 AGGREGATED_PATH = "s3a://history/"
-
 
 # Generate a timestamped Parquet file name
 current_date = datetime.now().strftime("%Y-%m-%d_%H-%M")
-agg_filename = f"{AGGREGATED_PATH}{current_date}.parquet"
 
+try:
+    # Read Parquet files without _spark_metadata issues
+    df = spark.read.option("mergeSchema", "true").parquet(PARQUET_PATH)
 
-# Read all Parquet files into a single DataFrame
-df = spark.read.parquet(PARQUET_PATH)
+    if df.count() > 0:
+        df.coalesce(1).write.mode("overwrite").parquet(f"{AGGREGATED_PATH}/agg_{current_date}")
+        print(f"Aggregated data saved to {AGGREGATED_PATH}/agg_{current_date}")
+    else:
+        print("No data to aggregate.")
 
+except Exception as e:
+    print(f"Error: {str(e)}")
 
-# Save the aggregated data as a single Parquet file
-df.write.mode("overwrite").parquet(agg_filename)
-
-
-
-
-# Ensure small files are deleted after aggregation
-fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(spark._jsc.hadoopConfiguration())
-path = spark._jvm.org.apache.hadoop.fs.Path(PARQUET_PATH)
-
-
-# Check if the directory exists before deleting
-if fs.exists(path):
-    for file_status in fs.listStatus(path):  # Iterate over files
-        fs.delete(file_status.getPath(), True)  # Delete each file
-    print(f"Deleted small files from {PARQUET_PATH}")
-else:
-    print(f"No files found to delete in {PARQUET_PATH}")
-
-
-print(f"Daily aggregated data saved: {agg_filename}")
-
-
-# Stop Spark Session
-spark.stop()
+finally:
+    spark.stop()
